@@ -23,7 +23,7 @@ pub enum ContentType {
     SpecVersion=0x24
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Request {
     length: u16,
     content: String
@@ -31,7 +31,7 @@ pub struct Request {
 
 impl FromReq for Request {
     fn size(self) -> usize {
-        self.length as usize + self.content.len()
+        std::mem::size_of::<u16>() + self.content.len()
     }
     fn read(bytes: &[u8]) -> Self {
         let mut iter_bytes = bytes.iter();
