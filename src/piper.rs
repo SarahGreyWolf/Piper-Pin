@@ -1,6 +1,17 @@
 use std::io::prelude::*;
 use std::io;
 
+pub trait FromReq {
+    fn size(self) -> usize;
+    fn read(bytes: &[u8]) -> Self;
+}
+
+pub trait AsResp {
+    fn size(self) -> usize;
+    fn bytes(self) -> Vec<u8>;
+}
+
+#[allow(dead_code)]
 pub enum ContentType {
     Text=0x00,
     GemText=0x01,
@@ -10,16 +21,6 @@ pub enum ContentType {
     ErrorNotFound=0x22,
     ErrorInternal=0x23,
     SpecVersion=0x24
-}
-
-pub trait FromReq {
-    fn size(self) -> usize;
-    fn read(bytes: &[u8]) -> Self;
-}
-
-pub trait AsResp {
-    fn size(self) -> usize;
-    fn bytes(self) -> [u8];
 }
 
 #[derive(Debug)]
@@ -43,4 +44,22 @@ impl FromReq for Request {
         }
     }
 }
+
+pub struct TextResponse(pub String);
+
+impl AsResp for TextResponse {
+    fn size(self) -> usize {
+        self.0.as_bytes().len() + std::mem::size_of::<u8>() + std::mem::size_of::<u64>()
+    }
+
+    fn bytes(self) -> Vec<u8> {
+        let mut response: Vec<u8> = vec![ContentType::Text as u8];
+        response.append(&mut self.0.clone().as_bytes().len().to_le_bytes().to_vec());
+        response.append(&mut self.0.clone().as_bytes().to_vec());
+        response
+    }
+}
+
+
+
 
