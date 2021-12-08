@@ -9,6 +9,7 @@ pub trait FromReq {
 pub trait AsResp {
     fn size(self) -> usize;
     fn bytes(self) -> Vec<u8>;
+    fn from_read<T: Read>(input: &mut T) -> Self;
 }
 
 #[allow(dead_code)]
@@ -60,6 +61,12 @@ impl AsResp for TextResponse {
         response.append(&mut string_clone.as_bytes().to_vec());
         response
     }
+
+    fn from_read<T: Read>(input: &mut T) -> Self {
+        let mut text = String::new();
+        input.read_to_string(&mut text).expect("Failed to convert input to string");
+        Self(text)
+    }
 }
 
 #[macro_export]
@@ -84,11 +91,20 @@ impl AsResp for GemTextResponse {
         response.append(&mut string_clone.as_bytes().to_vec());
         response
     }
+
+    fn from_read<T: Read>(input: &mut T) -> Self {
+        let mut text = String::new();
+        input.read_to_string(&mut text).expect("Failed to convert input to string");
+        Self(text)
+    }
 }
 
 #[macro_export]
 macro_rules! gem_response {
     ($input:literal, $($arg:tt)*) => {
         piper::GemTextResponse(format!("{}", format_args!($input, $($arg),*)))
-    }
+    };
+    ($input:expr) => {
+        piper::GemTextResponse::from_read($input)
+    };
 } 
