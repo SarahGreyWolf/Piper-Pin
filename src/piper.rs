@@ -3,7 +3,7 @@ use std::io;
 
 pub trait FromReq {
     fn size(self) -> usize;
-    fn read(bytes: &[u8]) -> Self;
+    fn read(input: impl Read) -> Self;
 }
 
 pub trait AsResp {
@@ -23,6 +23,7 @@ pub enum ContentType {
     SpecVersion=0x24
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone)]
 pub struct Request {
     length: u16,
@@ -33,10 +34,10 @@ impl FromReq for Request {
     fn size(self) -> usize {
         std::mem::size_of::<u16>() + self.content.len()
     }
-    fn read(bytes: &[u8]) -> Self {
-        let mut iter_bytes = bytes.iter();
-        let length = *iter_bytes.next().unwrap() as u16 + *iter_bytes.next().unwrap() as u16;
-        let mut content_bytes = iter_bytes.map(|b| *b ).collect::<Vec<u8>>();
+    fn read(input: impl Read) -> Self {
+        let mut iter_bytes = input.bytes();
+        let length = iter_bytes.next().unwrap().unwrap() as u16 + iter_bytes.next().unwrap().unwrap() as u16;
+        let mut content_bytes = iter_bytes.map(|b| b.unwrap() ).collect::<Vec<u8>>();
         content_bytes.truncate(length as usize);
         Self {
             length,
@@ -59,7 +60,3 @@ impl AsResp for TextResponse {
         response
     }
 }
-
-
-
-
