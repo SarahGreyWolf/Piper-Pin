@@ -22,8 +22,9 @@ fn handle_client(mut stream: TcpStream){
 
     stream.read(&mut buffer).unwrap();
 
-    let response = piper::TextResponse(format!("Hello World\nRequest: {:?}", req));
     let req = piper::Request::read(buffer.as_slice());
+    let response = text_response!("Hello World!\n{:?}", req);
+    //let response = piper::TextResponse(format!("Hello World\n{:?}", req));
     stream.write(&response.bytes()).unwrap();
     stream.flush().unwrap();
     println!("{:?}", req);

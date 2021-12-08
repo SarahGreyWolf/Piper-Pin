@@ -61,12 +61,22 @@ impl AsResp for TextResponse {
         response
     }
 }
+
+#[macro_export]
+macro_rules! text_response {
+    ($input:literal, $($arg:tt)*) => {
+        piper::TextResponse(format!("{}", format_args!($input, $($arg),*)))
+    }
+} 
+
 // A bit of a waste just to change the content type..
 pub struct GemTextResponse(pub String);
+
 impl AsResp for GemTextResponse {
     fn size(self) -> usize {
         self.0.as_bytes().len() + std::mem::size_of::<u8>() + std::mem::size_of::<u64>()
     }
+
     fn bytes(self) -> Vec<u8> {
         let mut response: Vec<u8> = vec![ContentType::GemText as u8];
         let string_clone = self.0.clone();
@@ -75,3 +85,10 @@ impl AsResp for GemTextResponse {
         response
     }
 }
+
+#[macro_export]
+macro_rules! gem_response {
+    ($input:literal, $($arg:tt)*) => {
+        piper::GemTextResponse(format!("{}", format_args!($input, $($arg),*)))
+    }
+} 
