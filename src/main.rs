@@ -3,8 +3,10 @@ use std::io::prelude::*;
 use std::io;
 use std::thread;
 use piper::{FromReq, AsResp};
+use thread_pool::ThreadPool;
 
 mod piper;
+mod thread_pool;
 
 fn main() -> io::Result<()> {
     let listener = TcpListener::bind("127.0.0.1:60")?;
